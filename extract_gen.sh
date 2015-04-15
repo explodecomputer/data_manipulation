@@ -111,7 +111,7 @@ echo ""
 mg=""
 ms=""
 
-for x in {19..22}
+for x in {1..23}
 do
 	i=`printf "%0*d" 2 ${x}`
 	filename=$(sed -e "s/@/$i/g" <<< ${genort})
