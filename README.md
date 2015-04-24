@@ -28,6 +28,9 @@ This uses plink2 (by adding the module `apps/plink2`) so it is very fast. If you
 
 Extracting or removing SNPs and individuals from the dosage data is also possible, though quite slow running by comparison. There are two options, the `extract_gen.sh` script will run everything by extracting from each chromosome sequentially, this will likely take several hours, or the `extract_gen_pbs.sh` script which is basically just a template for performing the extraction on each chromosome in parallel on bluecrystal3. This one should be much faster.
 
+
+### Simple one liner (slow)
+
 The `extract_gen.sh` it uses similar syntax to the `extract_plink.sh` script, but you need to provide the gen files and sample file. The dosage files are located here:
 
 	/panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/27Feb2015/data/genotypes/dosage/
@@ -50,6 +53,7 @@ Here is an example that would remove a list of SNPs and remove a list of individ
 		--out test \
 
 
+### Running batch job (much faster)
 
 The `extract_gen_pbs.sh` script will require some modification from the user - just fill in the lines stating where the files listing SNPs or individuals to extract are located, and where to put the output. For example:
 
