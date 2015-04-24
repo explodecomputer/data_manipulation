@@ -3,7 +3,7 @@
 The ALSPAC data comprises about 18000 individuals (mothers and children) with around 40 million imputed SNPs. The two main formats in which these data are stored are in best guess binary plink (`.bed`, `.bim`, `.fam` files) and gen format dosage files (`.gz` and `.sample`)
 
 
-## Best guess
+## Best guess data
 
 These files are located at:
 
