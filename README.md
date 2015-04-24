@@ -26,7 +26,9 @@ This uses plink2 (by adding the module `apps/plink2`) so it is very fast. If you
 
 ## Dosage data
 
-Extracting or removing SNPs and individuals from the dosage data is also possible, though quite slow running. It will take several hours to run this. Use the `extract_gen.sh` script - it uses similar syntax to the `extract_plink.sh` script, but you need to provide the gen files and sample file. The dosage files are located here:
+Extracting or removing SNPs and individuals from the dosage data is also possible, though quite slow running by comparison. There are two options, the `extract_gen.sh` script will run everything by extracting from each chromosome sequentially, this will likely take several hours, or the `extract_gen_pbs.sh` script which is basically just a template for performing the extraction on each chromosome in parallel on bluecrystal3. This one should be much faster.
+
+The `extract_gen.sh` it uses similar syntax to the `extract_plink.sh` script, but you need to provide the gen files and sample file. The dosage files are located here:
 
 	/panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/27Feb2015/data/genotypes/dosage/
 
@@ -46,3 +48,38 @@ Here is an example that would remove a list of SNPs and remove a list of individ
 		--exclude snplist.txt \
 		--remove idlist.sample \
 		--out test \
+
+
+
+The `extract_gen_pbs.sh` script will require some modification from the user - just fill in the lines stating where the files listing SNPs or individuals to extract are located, and where to put the output. For example:
+
+
+	# Change this file to point to where you want the results to go
+	outfile="${HOME}/results_chr${i}"
+
+	# Enter file with list of IDs to extract
+	keepids="idlist.txt"
+
+	# Enter file with list of SNPs to keep
+	keepsnps="snplist.sample"
+
+You can test that the script is actually working by running it for just one chromosome in the frontend:
+
+	./extract_gen_pbs.sh 22
+
+will run the script for chromosome 22. Not a good idea to let this keep running for a long time in the front end, main thing is to just make sure that it does work for you, and then to kill it press `ctrl + c`. To submit the job to extract all chromosomes simply run:
+
+	qsub extract_gen_pbs.sh
+
+and you can monitor the progress by typing
+
+	qstat -u <username>
+
+Once it's complete you should have 23 pairs of files in the output location you specified, to merge them together you need to run:
+
+	gtool -M --g ${HOME}/results_chr*[!sample].gz --s ${HOME}/results_chr*.sample.gz --og ${HOME}/results --os ${HOME}/results.sample
+	gzip ${HOME}/results
+
+and then once you're happy that everything has been merged satisfactorily
+
+	rm ${HOME}/results_chr*
