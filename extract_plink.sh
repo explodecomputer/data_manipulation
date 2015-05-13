@@ -143,7 +143,7 @@ done
 
 printf "\nMerging...\n"
 sed -i 1d ${outfile}_mergelist.txt
-plink1.90 --noweb --bfile ${outfile}_${firstchr} --merge-list ${outfile}_mergelist.txt --make-bed --out ${outfile} >/dev/null 2>&1
+plink --noweb --bfile ${outfile}_${firstchr} --merge-list ${outfile}_mergelist.txt --make-bed --out ${outfile}
 
 rm ${outfile}_*
 
