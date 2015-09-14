@@ -33,6 +33,10 @@ case $key in
 	showhelp="yes"
 	shift
 	;;
+	-l|--leading)
+	leading="true"
+	shift
+	;;
 	--default)
 	DEFAULT=YES
 	shift
@@ -51,7 +55,7 @@ function instructions {
 	echo "This script uses plink1.90 (required in your path) to extract SNPs and/or individuals"
 	echo "from binary plink data that has been split into 23 chromosomes"
 	echo ""
-	echo "--rootname [argument]          Binary plinkfile rootname. e.g. if the data is located at"
+	echo "--rootname [argument]           Binary plinkfile rootname. e.g. if the data is located at"
 	echo "                                chr01.bed chr01.bim chr01.fam chr02.bed chr02.bim ... etc"
 	echo "                                then use: chr@"
 	echo "                                where the @ symbol represents the chromosome number"
@@ -60,6 +64,8 @@ function instructions {
 	echo "--keep [argument]               File containing list of SNPs to keep"
 	echo "--remove [argument]             File containing list of SNPs to exclude"
 	echo "--out [argument]                Output filename"
+	echo "--leading                       Use leading zeros in filename"
+	echo ""
 	exit
 }
 
@@ -78,7 +84,7 @@ echo ""
 echo "Plink root name = ${plinkrt}"
 echo "Output file     = ${outfile}"
 
-> ${outfile}_mergelist.txt
+rm -f ${outfile}_mergelist.txt
 firstchr="1"
 flag="0"
 
@@ -108,7 +114,11 @@ echo ""
 
 for x in {1..23}
 do
-	i=`printf "%0*d" 2 ${x}`
+	i=${x}
+	if [ "${leading}" -eq "true" ]; then
+		i=`printf "%0*d" 2 ${x}`
+	fi
+	
 	filename=$(sed -e "s/@/$i/g" <<< ${plinkrt})
 
 	if [ ! -f "${filename}.bed" ]; then
