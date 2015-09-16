@@ -1,45 +1,90 @@
 #!/bin/bash
 
+function instructions {
+	echo ""
+	echo "This script uses plink1.90 (required in your path) to extract SNPs and/or individuals"
+	echo "from binary plink data that has been split into 23 chromosomes"
+	echo ""
+	echo "-p [argument]             Binary plinkfile rootname. e.g. if the data is located at"
+	echo "                          chr01.bed chr01.bim chr01.fam chr02.bed chr02.bim ... etc"
+	echo "                          then use: chr@"
+	echo "                          where the @ symbol represents the chromosome number"
+	echo "-x [argument]             File containing list of SNPs to keep"
+	echo "-e [argument]             File containing list of SNPs to exclude"
+	echo "-k [argument]             File containing list of SNPs to keep"
+	echo "-r [argument]             File containing list of SNPs to exclude"
+	echo "-o [argument]             Output filename"
+	echo "-l                        Use leading zeros in filename"
+	echo ""
+	exit
+}
+
+
+# while getopts "h?pxekrol:" opt; do
+# 	case "$opt" in
+# 	h|\?)
+# 		instructions
+# 		;;
+# 	p)  plinkrt=$OPTARG
+# 		;;
+# 	x)  snplistfile1=$OPTARG
+# 		;;
+# 	e)	snplistfile2=$OPTARG
+# 		;;
+# 	k)	idfile1=$OPTARG
+# 		;;
+# 	r)	idfile2=$OPTARG
+# 		;;
+# 	o)	outfile=$OPTARG
+# 		;;
+# 	l)	leading=1
+# 		;;
+# 	esac
+# done
+
+# shift $((OPTIND-1))
+
+# [ "$1" = "--" ] && shift
+
+
+
 while [[ $# > 1 ]]
 do
 key="$1"
 
 case $key in
 	-p|--rootname)
-	plinkrt="${2}"
+	plinkrt="$2"
 	shift
 	;;
 	-x|--extract)
-	snplistfile1="${2}"
+	snplistfile1="$2"
 	shift
 	;;
 	-e|--exclude)
-	snplistfile2="${2}"
+	snplistfile2="$2"
 	shift
 	;;
 	-k|--keep)
-	idfile1="${2}"
+	idfile1="$2"
 	shift
 	;;
 	-r|--remove)
-	idfile2="${2}"
+	idfile2="$2"
 	shift
 	;;
 	-o|--out)
-	outfile="${2}"
-	shift
-	;;
-	-h|--help)
-	showhelp="yes"
+	outfile="$2"
 	shift
 	;;
 	-l|--leading)
-	leading="true"
-	shift
+	leading="yes"
 	;;
 	--default)
 	DEFAULT=YES
-	shift
+	;;
+	-h|--help)
+	showhelp="yes"
 	;;
 	*)
 			# unknown option
@@ -50,25 +95,16 @@ done
 
 module add apps/plink2
 
-function instructions {
-	echo ""
-	echo "This script uses plink1.90 (required in your path) to extract SNPs and/or individuals"
-	echo "from binary plink data that has been split into 23 chromosomes"
-	echo ""
-	echo "--rootname [argument]           Binary plinkfile rootname. e.g. if the data is located at"
-	echo "                                chr01.bed chr01.bim chr01.fam chr02.bed chr02.bim ... etc"
-	echo "                                then use: chr@"
-	echo "                                where the @ symbol represents the chromosome number"
-	echo "--extract [argument]            File containing list of SNPs to keep"
-	echo "--exclude [argument]            File containing list of SNPs to exclude"
-	echo "--keep [argument]               File containing list of SNPs to keep"
-	echo "--remove [argument]             File containing list of SNPs to exclude"
-	echo "--out [argument]                Output filename"
-	echo "--leading                       Use leading zeros in filename"
-	echo ""
-	exit
-}
 
+echo ""
+echo "Plink root name = ${plinkrt}"
+echo "Output file     = ${outfile}"
+echo "Leading         = ${leading}"
+
+if [ -z "${plinkrt}" ]; then
+	echo "No -p flag"
+	instructions
+fi
 
 if [ ! -z "${showhelp}" ]; then
 	instructions
@@ -79,10 +115,6 @@ if [[ -n $1 ]]; then
     instructions
     exit 1
 fi
-
-echo ""
-echo "Plink root name = ${plinkrt}"
-echo "Output file     = ${outfile}"
 
 rm -f ${outfile}_mergelist.txt
 firstchr="1"
@@ -115,25 +147,28 @@ echo ""
 for x in {1..23}
 do
 	i=${x}
-	if [ "${leading}" -eq "true" ]; then
+	if [ ! -z "${leading}" ]; then
 		i=`printf "%0*d" 2 ${x}`
 	fi
-	
+
 	filename=$(sed -e "s/@/$i/g" <<< ${plinkrt})
 
 	if [ ! -f "${filename}.bed" ]; then
-		echo "The file '${filename}'.bed does not exist"
-		instructions
+		echo "The file ${filename}.bed does not exist"
+		continue
+		# instructions
 	fi
 
 	if [ ! -f "${filename}.bim" ]; then
 		echo "The file '${filename}'.bim does not exist"
-		instructions
+		continue
+		# instructions
 	fi
 
 	if [ ! -f "${filename}.fam" ]; then
 		echo "The file '${filename}'.fam does not exist"
-		instructions
+		continue
+		# instructions
 	fi
 
 	printf "Chromsome ${x} ... "
