@@ -48,6 +48,7 @@ esac
 shift
 done
 
+module add apps/qctool-1.3
 module add apps/gtool-0.7.5
 
 function instructions {
@@ -56,8 +57,8 @@ function instructions {
 	echo "from impute2 dosage data that has been split into 23 chromosomes"
 	echo ""
 	echo "--rootname [argument]           Impute2 output rootname. e.g. if the data is located at"
-	echo "                                chr01.gz chr02.gz chr03.gz ... etc"
-	echo "                                then use: chr@.gz"
+	echo "                                chr01.bgen chr02.bgen chr03.bgen ... etc"
+	echo "                                then use: chr@.bgen"
 	echo "                                where the @ symbol represents the chromosome number"
 	echo "--sample [argument]             Impute2 sample file"
 	echo "--extract [argument]            File containing list of SNPs to keep"
@@ -84,25 +85,25 @@ echo "Impute2 root name = ${genort}"
 echo "Sample file       = ${samplefile}"
 echo "Output files      = ${outfile}"
 
-cmdbase="gtool -S --s ${samplefile}"
+cmdbase="qctool -s ${samplefile}"
 
 if [ ! -z "${snplistfile1}" ]; then
-	cmdbase="${cmdbase} --inclusion ${snplistfile1}"
+	cmdbase="${cmdbase} -incl-rsids ${snplistfile1}"
 	echo "SNPs to keep      = ${snplistfile1}"
 fi
 
 if [ ! -z "${snplistfile2}" ]; then
-	cmdbase="${cmdbase} --exclusion ${snplistfile2}"
+	cmdbase="${cmdbase} -excl-rsids ${snplistfile2}"
 	echo "SNPs to exclude   = ${snplistfile2}"
 fi
 
 if [ ! -z "${idfile1}" ]; then
-	cmdbase="${cmdbase} --sample_id ${idfile1}"
+	cmdbase="${cmdbase} -incl-samples ${idfile1}"
 	echo "IDs to keep       = ${idfile1}"
 fi
 
 if [ ! -z "${idfile2}" ]; then
-	cmdbase="${cmdbase} --sample_excl ${idfile2}"
+	cmdbase="${cmdbase} -excl-samples ${idfile2}"
 	echo "IDs to remove     = ${idfile1}"
 fi
 
@@ -110,6 +111,8 @@ echo ""
 
 mg=""
 ms=""
+
+flag=0
 
 for x in {1..23}
 do
@@ -121,39 +124,38 @@ do
 		instructions
 	fi
 
-	cmd="${cmdbase} --g ${filename} --os ${outfile}_${i}.sample --og ${outfile}_${i}"
-	${cmd}
+	echo "chr ${x}..."
+	cmd="${cmdbase} -g ${filename} -os ${outfile}_${i}.sample -og ${outfile}_${i}.gen"
+	${cmd} > /dev/null 2>&1
 
+	og="${outfile}_${i}.gen"
 
-	og="${outfile}_${i}"
-	os="${outfile}_${i}.sample"
+	if [[ -s $og ]];
+	then
+		flag=1
+		os="${outfile}_${i}.sample"
+		mg="${mg} ${og}"
 
-	if [[ ${filename} =~ \.gz$ ]]; then
-		og="${og}.gz"
-		os="${os}.gz"
-		gflag=1
+		echo "data extracted"
+	else
+		echo "no data extracted"
 	fi
-
-	mg="${mg} ${og}"
-	ms="${ms} ${os}"
 
 done
 
 
+if [ "$flag" -eq "1" ];
+then
 
-printf "\nMerging...\n"
+	printf "\nMerging...\n"
+	echo ${mg}
 
-if [[ "${gflag}" -eq "1" ]]; then
-	outfileg="${outfile}.gz"
-	outfiles="${outfile}.sample.gz"
+	cat ${mg} > ${outfile}.gen
+	cp ${os} ${outfile}.sample
+	rm ${outfile}_*
+
 else
-	outfileg="${outfile}"
-	outfiles="${outfile}.sample"
+	printf "\nNo data extracted\n"
 fi
-
-gtool -M --g ${mg} --s ${ms} --og ${outfile} --os ${outfile}.sample
-gzip ${outfile}
-
-rm ${outfile}_*
 
 echo "Done"

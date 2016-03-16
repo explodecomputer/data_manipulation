@@ -3,6 +3,30 @@
 The ALSPAC data comprises about 18000 individuals (mothers and children) with around 40 million imputed SNPs. The two main formats in which these data are stored are in best guess binary plink (`.bed`, `.bim`, `.fam` files) and gen format dosage files (`.gz` and `.sample`)
 
 
+# UPDATE
+
+The imputed data is now also available in bgen format, which is a binary format of the dosage data and should be faster to read etc than the gen.gz files. It can be read by a programme called `qctool`, see here for more details:
+
+[http://www.well.ox.ac.uk/~gav/qctool/#tutorial](http://www.well.ox.ac.uk/~gav/qctool/#tutorial)
+
+The problem with qctool is that it doesn't seem like it's possible to merge bgen files unless they all have the same SNPs, which is kind of pointless if you want to combine SNPs from different chromosomes in the same individuals.
+
+Anyway, the script `extract_bgen.sh` extracts SNPs / samples in dosage format from bgen into gen files, and then combines them into .gen files (not binary), and then `cat`s them together into a single .gen file.
+
+If there are any better solutions then let me know!
+
+Example:
+
+```
+ ./extract_bgen.sh \
+ 	--rootname /panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/2015-10-30/data/dosage_bgen/data_chr@.bgen \
+ 	--sample /panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/2015-10-30/data/data.sample \
+ 	--extract snplist.txt \
+ 	--keep idlist.txt \
+ 	--out test
+```
+
+
 ## Best guess data
 
 These files are located at:
