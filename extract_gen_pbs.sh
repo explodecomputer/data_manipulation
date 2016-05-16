@@ -34,7 +34,7 @@ keepids=""
 keepsnps=""
 
 
-gtool \
+gtool -S \
 	--g ${genfile} \
 	--s ${samplefile} \
 	--inclusion ${keepsnps} \
