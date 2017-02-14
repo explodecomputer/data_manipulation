@@ -40,7 +40,8 @@ They are broken up into chromosomes, so 23 sets of binary plink files. If you ha
 For example, to extract a subset of SNPs and individuals and merge the results into a single file set (`test.bed`, `test.bim`, `test.fam`) run the following:
 
 	./extract_plink.sh \
-		--rootname /panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/27Feb2015/data/genotypes/bestguess/data_chr@ \
+		-l \
+		--rootname /panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/2015-10-30/data/bestguess/data_chr@ \
 		--extract snplist.txt \
 		--keep idlist.txt \
 		--out test
