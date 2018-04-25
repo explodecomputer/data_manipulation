@@ -3,15 +3,27 @@
 The ALSPAC data comprises about 18000 individuals (mothers and children) with around 40 million imputed SNPs. The two main formats in which these data are stored are in best guess binary plink (`.bed`, `.bim`, `.fam` files) and gen format dosage files (`.gz` and `.sample`)
 
 
-# UPDATE
+# Update 2
 
-The imputed data is now also available in bgen format, which is a binary format of the dosage data and should be faster to read etc than the gen.gz files. It can be read by a programme called `qctool`, see here for more details:
+The SNPs and IDs can be extracted from bgen files extremely easily using `qctool`
 
 [http://www.well.ox.ac.uk/~gav/qctool/#tutorial](http://www.well.ox.ac.uk/~gav/qctool/#tutorial)
 
-The problem with qctool is that it doesn't seem like it's possible to merge bgen files unless they all have the same SNPs, which is kind of pointless if you want to combine SNPs from different chromosomes in the same individuals.
+For example:
 
-Anyway, the script `extract_bgen.sh` extracts SNPs / samples in dosage format from bgen into gen files, and then combines them into .gen files (not binary), and then `cat`s them together into a single .gen file.
+```
+qctool -g data_chr#.bgen -s data.sample -incl-samples idlist.txt -incl-rsids snplist.txt -og extracted.bgen
+```
+
+The scripts in this repository are probably redundant now but will leave the stuff below just in case it is of any value.
+
+Note that if bluecrystal servers don't have the latest qctool binaries then they can be downloaded directly.
+
+---
+
+### bgen files
+
+The script `extract_bgen.sh` extracts SNPs / samples in dosage format from bgen into gen files, and then combines them into .gen files (not binary), and then `cat`s them together into a single .gen file.
 
 If there are any better solutions then let me know!
 
@@ -27,7 +39,7 @@ Example:
 ```
 
 
-## Best guess data
+### Best guess data
 
 These files are located at:
 
@@ -49,7 +61,7 @@ For example, to extract a subset of SNPs and individuals and merge the results i
 This uses plink2 (by adding the module `apps/plink2`) so it is very fast. If you have the option to work with best guess SNPs instead of dosages it is recommended that you use these (filtering on MAF and INFO score as necessary).
 
 
-## Dosage data
+### Dosage data
 
 Extracting or removing SNPs and individuals from the dosage data is also possible, though quite slow running by comparison. There are two options, the `extract_gen.sh` script will run everything by extracting from each chromosome sequentially, this will likely take several hours, or the `extract_gen_pbs.sh` script which is basically just a template for performing the extraction on each chromosome in parallel on bluecrystal3. This one should be much faster.
 
